@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Nocturne House, an immersive espresso bar and late-night cafe experience." />
+  <title>Nocturne House | Immersive Cafe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/lenis@1.1.14/dist/lenis.min.js"></script>
+  <style>
+    :root {
+      --bg: #0a0908;
+      --bg-soft: #120f0c;
+      --espresso: #1d120d;
+      --charcoal: #171512;
+      --cream: #f3e7cf;
+      --muted: #b7a98e;
+      --gold: #caa24b;
+      --gold-bright: #f1c765;
+      --line: rgba(243, 231, 207, 0.16);
+      --shadow: rgba(0, 0, 0, 0.55);
+      --max: 1180px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      scroll-behavior: auto;
+    }
+
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 16% 18%, rgba(202, 162, 75, 0.13), transparent 24rem),
+        radial-gradient(circle at 85% 8%, rgba(124, 77, 42, 0.18), transparent 27rem),
+        linear-gradient(180deg, #050403 0%, var(--bg) 38%, #0d0b09 100%);
+      cursor: none;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 9997;
+      pointer-events: none;
+      opacity: 0.18;
+      mix-blend-mode: soft-light;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.74'/%3E%3C/svg%3E");
+    }
+
+    a,
+    button {
+      color: inherit;
+      cursor: none;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    .cursor-dot,
+    .cursor-ring {
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 10000;
+      pointer-events: none;
+      border-radius: 999px;
+      transform: translate(-50%, -50%);
+    }
+
+    .cursor-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--gold-bright);
+      box-shadow: 0 0 22px rgba(241, 199, 101, 0.8);
+    }
+
+    .cursor-ring {
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(241, 199, 101, 0.62);
+      transition: width 0.28s ease, height 0.28s ease, border-color 0.28s ease, background 0.28s ease;
+    }
+
+    body.is-hovering .cursor-ring {
+      width: 66px;
+      height: 66px;
+      border-color: rgba(241, 199, 101, 0.26);
+      background: rgba(241, 199, 101, 0.08);
+    }
+
+    .scroll-cup {
+      position: fixed;
+      right: clamp(16px, 2.3vw, 34px);
+      bottom: clamp(16px, 2.3vw, 34px);
+      z-index: 9000;
+      width: 70px;
+      height: 82px;
+      opacity: 0.94;
+      filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.35));
+    }
+
+    .scroll-cup svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .scroll-cup .cup-liquid {
+      transition: height 0.08s linear, y 0.08s linear;
+    }
+
+    .site-nav {
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 50;
+      width: 100%;
+      padding: 24px clamp(18px, 4vw, 56px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--cream);
+      mix-blend-mode: difference;
+    }
+
+    .brand {
+      font-family: "Playfair Display", serif;
+      font-size: clamp(1.25rem, 2vw, 1.8rem);
+      font-weight: 800;
+      letter-spacing: 0;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: clamp(16px, 2.2vw, 30px);
+      align-items: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: rgba(243, 231, 207, 0.82);
+      transition: color 0.25s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--gold-bright);
+    }
+
+    section {
+      position: relative;
+      min-height: 100vh;
+      padding: clamp(80px, 10vw, 140px) clamp(20px, 5vw, 72px);
+      isolation: isolate;
+    }
+
+    .section-inner {
+      width: min(100%, var(--max));
+      margin: 0 auto;
+    }
+
+    .hero {
+      display: grid;
+      align-items: end;
+      min-height: 100svh;
+      padding-top: 120px;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(10, 9, 8, 0.24) 0%, rgba(10, 9, 8, 0.5) 46%, rgba(10, 9, 8, 0.94) 100%),
+        url("https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=2400&q=85") center/cover fixed;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: 30vh;
+      background: linear-gradient(180deg, transparent, var(--bg));
+      z-index: -1;
+    }
+
+    .hero-content {
+      width: min(100%, 1050px);
+      padding-bottom: clamp(52px, 8vw, 92px);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 22px;
+      color: var(--gold-bright);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 42px;
+      height: 1px;
+      background: currentColor;
+    }
+
+    h1,
+    h2,
+    .menu-item-title {
+      font-family: "Playfair Display", serif;
+      line-height: 0.92;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      max-width: 980px;
+      font-size: clamp(4rem, 12vw, 11.8rem);
+      font-weight: 800;
+      text-wrap: balance;
+      text-shadow: 0 30px 70px rgba(0, 0, 0, 0.58);
+    }
+
+    .hero-copy {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 32px;
+      align-items: end;
+      margin-top: 34px;
+      max-width: 900px;
+    }
+
+    .lead {
+      color: rgba(243, 231, 207, 0.78);
+      font-size: clamp(1.05rem, 1.7vw, 1.34rem);
+      line-height: 1.7;
+    }
+
+    .magnetic {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 56px;
+      padding: 0 26px;
+      border: 1px solid rgba(241, 199, 101, 0.55);
+      border-radius: 999px;
+      background: rgba(202, 162, 75, 0.1);
+      color: var(--cream);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      text-decoration: none;
+      overflow: hidden;
+      transition: border-color 0.28s ease, background 0.28s ease;
+      will-change: transform;
+    }
+
+    .magnetic::before {
+      content: "";
+      position: absolute;
+      inset: auto auto -70% -10%;
+      width: 120%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: rgba(241, 199, 101, 0.16);
+      transform: scale(0);
+      transition: transform 0.45s ease;
+    }
+
+    .magnetic span {
+      position: relative;
+      z-index: 1;
+    }
+
+    .magnetic:hover {
+      border-color: var(--gold-bright);
+      background: rgba(202, 162, 75, 0.18);
+    }
+
+    .magnetic:hover::before {
+      transform: scale(1);
+    }
+
+    .floaters {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .bean,
+    .steam {
+      position: absolute;
+      opacity: 0;
+      will-change: transform, opacity;
+    }
+
+    .bean {
+      width: 18px;
+      height: 30px;
+      border-radius: 55% 45% 55% 45%;
+      background: linear-gradient(135deg, #3a2115, #120906 62%, #6c4328);
+      box-shadow: inset 4px 0 0 rgba(241, 199, 101, 0.12), 0 18px 42px rgba(0, 0, 0, 0.35);
+    }
+
+    .bean::after {
+      content: "";
+      position: absolute;
+      left: 43%;
+      top: 12%;
+      width: 2px;
+      height: 76%;
+      border-radius: 999px;
+      background: rgba(243, 231, 207, 0.2);
+      transform: rotate(13deg);
+    }
+
+    .bean:nth-child(1) { left: 12%; top: 28%; }
+    .bean:nth-child(2) { left: 77%; top: 18%; transform: rotate(54deg); }
+    .bean:nth-child(3) { left: 62%; top: 70%; transform: rotate(-22deg); }
+    .bean:nth-child(4) { left: 22%; top: 78%; transform: rotate(31deg); }
+
+    .steam {
+      width: 2px;
+      height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, transparent, rgba(243, 231, 207, 0.42), transparent);
+      filter: blur(2px);
+    }
+
+    .steam:nth-child(5) { left: 48%; top: 14%; }
+    .steam:nth-child(6) { left: 53%; top: 18%; height: 150px; }
+    .steam:nth-child(7) { left: 58%; top: 12%; height: 110px; }
+
+    .intro {
+      display: grid;
+      align-items: center;
+      background: linear-gradient(180deg, var(--bg) 0%, #0f0b08 100%);
+    }
+
+    .intro-grid {
+      display: grid;
+      grid-template-columns: 0.82fr 1.18fr;
+      gap: clamp(34px, 6vw, 96px);
+      align-items: center;
+    }
+
+    .portrait {
+      min-height: 620px;
+      border-radius: 8px;
+      background:
+        linear-gradient(180deg, rgba(10, 9, 8, 0.04), rgba(10, 9, 8, 0.54)),
+        url("https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1200&q=85") center/cover;
+      box-shadow: 0 34px 90px var(--shadow);
+    }
+
+    .section-kicker {
+      margin-bottom: 22px;
+      color: var(--gold);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      font-size: clamp(2.7rem, 6.8vw, 7rem);
+      font-weight: 700;
+      text-wrap: balance;
+    }
+
+    .reveal-line {
+      color: rgba(243, 231, 207, 0.78);
+      font-size: clamp(1.2rem, 2.05vw, 2.1rem);
+      line-height: 1.45;
+      margin-top: 30px;
+    }
+
+    .line-mask {
+      display: block;
+      overflow: hidden;
+    }
+
+    .line-inner {
+      display: block;
+      will-change: transform, opacity;
+    }
+
+    .word-probe {
+      display: inline-block;
+      white-space: pre;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 46px;
+      border-top: 1px solid var(--line);
+      padding-top: 28px;
+    }
+
+    .stat strong {
+      display: block;
+      color: var(--gold-bright);
+      font-family: "Playfair Display", serif;
+      font-size: clamp(2rem, 4vw, 3.8rem);
+      line-height: 1;
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .menu {
+      background:
+        radial-gradient(circle at 85% 38%, rgba(202, 162, 75, 0.12), transparent 25rem),
+        linear-gradient(180deg, #0f0b08 0%, #070605 100%);
+    }
+
+    .menu-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 32px;
+      margin-bottom: clamp(42px, 6vw, 76px);
+    }
+
+    .menu-head p {
+      max-width: 390px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .menu-list {
+      border-top: 1px solid var(--line);
+    }
+
+    .menu-item {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 22px;
+      align-items: center;
+      min-height: clamp(92px, 12vw, 150px);
+      padding: 24px 0;
+      border-bottom: 1px solid var(--line);
+      color: var(--cream);
+    }
+
+    .menu-item-title {
+      font-size: clamp(2.8rem, 8vw, 8rem);
+      font-weight: 700;
+      transition: color 0.32s ease, transform 0.32s ease;
+    }
+
+    .menu-item p {
+      max-width: 330px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .menu-item .price {
+      color: var(--gold-bright);
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+
+    .menu-item:hover .menu-item-title {
+      color: var(--gold-bright);
+      transform: translateX(18px);
+    }
+
+    .drink-preview {
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 8000;
+      width: min(280px, 42vw);
+      aspect-ratio: 4 / 5;
+      border-radius: 8px;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, -50%) rotate(-4deg) scale(0.88);
+      box-shadow: 0 34px 80px rgba(0, 0, 0, 0.56);
+    }
+
+    .drink-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .ritual {
+      min-height: 88vh;
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(90deg, rgba(10, 9, 8, 0.94), rgba(10, 9, 8, 0.5), rgba(10, 9, 8, 0.98)),
+        url("https://images.unsplash.com/photo-1442512595331-e89e73853f31?auto=format&fit=crop&w=2200&q=85") center/cover fixed;
+    }
+
+    .ritual-card {
+      width: min(100%, 820px);
+    }
+
+    .ritual h2 {
+      font-size: clamp(3.2rem, 8vw, 8.8rem);
+    }
+
+    .reservation {
+      display: grid;
+      place-items: center;
+      min-height: 80vh;
+      background: #090706;
+    }
+
+    .reservation-box {
+      width: min(100%, 940px);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 40px;
+      align-items: center;
+      padding-block: clamp(40px, 7vw, 88px);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .reservation p {
+      max-width: 590px;
+      margin-top: 24px;
+      color: var(--muted);
+      font-size: clamp(1rem, 1.7vw, 1.2rem);
+      line-height: 1.8;
+    }
+
+    footer {
+      padding: 34px clamp(20px, 5vw, 72px);
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      color: rgba(243, 231, 207, 0.48);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: #070605;
+    }
+
+    @media (max-width: 860px) {
+      body {
+        cursor: auto;
+      }
+
+      a,
+      button {
+        cursor: pointer;
+      }
+
+      .cursor-dot,
+      .cursor-ring {
+        display: none;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .hero {
+        background-attachment: scroll;
+      }
+
+      .hero-copy,
+      .intro-grid,
+      .reservation-box {
+        grid-template-columns: 1fr;
+      }
+
+      .portrait {
+        min-height: 420px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .menu-head {
+        display: block;
+      }
+
+      .menu-head p {
+        margin-top: 20px;
+      }
+
+      .menu-item {
+        grid-template-columns: 1fr;
+      }
+
+      .menu-item:hover .menu-item-title {
+        transform: none;
+      }
+
+      .drink-preview {
+        display: none;
+      }
+
+      .scroll-cup {
+        width: 58px;
+        height: 68px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="cursor-dot" aria-hidden="true"></div>
+  <div class="cursor-ring" aria-hidden="true"></div>
+
+  <div class="scroll-cup" aria-hidden="true">
+    <svg viewBox="0 0 96 112" role="img">
+      <defs>
+        <clipPath id="cup-bowl-clip">
+          <path d="M22 28h52l-6 60c-.8 8-7.5 14-15.6 14H43.6c-8 0-14.8-6-15.6-14L22 28Z" />
+        </clipPath>
+        <linearGradient id="liquidGradient" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stop-color="#f5d278" />
+          <stop offset="100%" stop-color="#a97825" />
+        </linearGradient>
+      </defs>
+      <rect class="cup-liquid" x="20" y="102" width="56" height="0" fill="url(#liquidGradient)" clip-path="url(#cup-bowl-clip)" />
+      <path d="M22 28h52l-6 60c-.8 8-7.5 14-15.6 14H43.6c-8 0-14.8-6-15.6-14L22 28Z" fill="none" stroke="#f3e7cf" stroke-width="3.5" stroke-linejoin="round" />
+      <path d="M73 42h5c9 0 15 6 15 14s-6 14-15 14h-7" fill="none" stroke="#f3e7cf" stroke-width="3.5" stroke-linecap="round" />
+      <path d="M16 105h64" fill="none" stroke="#f3e7cf" stroke-width="3.5" stroke-linecap="round" opacity=".72" />
+      <path d="M35 12c-5 6 5 9 0 15M48 8c-5 8 5 11 0 18M61 12c-5 6 5 9 0 15" fill="none" stroke="#caa24b" stroke-width="3" stroke-linecap="round" opacity=".86" />
+    </svg>
+  </div>
+
+  <nav class="site-nav">
+    <a class="brand hover-target" href="#top">Nocturne House</a>
+    <div class="nav-links">
+      <a class="hover-target" href="#ritual">Ritual</a>
+      <a class="hover-target" href="#menu">Menu</a>
+      <a class="hover-target" href="#reserve">Reserve</a>
+    </div>
+  </nav>
+
+  <main id="top">
+    <section class="hero">
+      <div class="floaters" aria-hidden="true">
+        <span class="bean"></span>
+        <span class="bean"></span>
+        <span class="bean"></span>
+        <span class="bean"></span>
+        <span class="steam"></span>
+        <span class="steam"></span>
+        <span class="steam"></span>
+      </div>
+      <div class="hero-content">
+        <p class="eyebrow">Open after dusk</p>
+        <h1 class="split-reveal">Espresso for the beautifully awake.</h1>
+        <div class="hero-copy">
+          <p class="lead split-reveal">A candlelit cafe for slow mornings, velvet nights, and coffee pulled with the patience of a good secret.</p>
+          <a class="magnetic hover-target" href="#menu"><span>Explore menu</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="intro" id="ritual">
+      <div class="section-inner intro-grid">
+        <div class="portrait"></div>
+        <div>
+          <p class="section-kicker">The ritual</p>
+          <h2 class="split-reveal">Dark roast, soft light, no rush.</h2>
+          <p class="reveal-line split-reveal">We source small-lot beans, roast in restrained batches, and serve each cup at the pace it deserves. The room is intimate, the music is low, and the first sip does the talking.</p>
+          <div class="stats">
+            <div class="stat">
+              <strong>18</strong>
+              <span>Seats only</span>
+            </div>
+            <div class="stat">
+              <strong>04</strong>
+              <span>Origin roasts</span>
+            </div>
+            <div class="stat">
+              <strong>2AM</strong>
+              <span>Weekend close</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="menu" id="menu">
+      <div class="section-inner">
+        <div class="menu-head">
+          <div>
+            <p class="section-kicker">Anti-boring menu</p>
+            <h2 class="split-reveal">Choose your gravity.</h2>
+          </div>
+          <p class="split-reveal">Hover each pour to preview the mood. Every drink is tuned for texture, aroma, and the particular drama of staying a little longer.</p>
+        </div>
+
+        <div class="menu-list">
+          <article class="menu-item hover-target" data-image="https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=900&q=85">
+            <div>
+              <h3 class="menu-item-title">Midnight Cortado</h3>
+              <p>Equal parts espresso and silked milk, finished with smoked panela.</p>
+            </div>
+            <span class="price">$7</span>
+          </article>
+          <article class="menu-item hover-target" data-image="https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=900&q=85">
+            <div>
+              <h3 class="menu-item-title">Gold Leaf Latte</h3>
+              <p>House espresso, vanilla cream, saffron honey, and a quiet shimmer.</p>
+            </div>
+            <span class="price">$9</span>
+          </article>
+          <article class="menu-item hover-target" data-image="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=900&q=85">
+            <div>
+              <h3 class="menu-item-title">Velvet Cold Brew</h3>
+              <p>Twenty-hour extraction over a salted cacao cloud.</p>
+            </div>
+            <span class="price">$8</span>
+          </article>
+          <article class="menu-item hover-target" data-image="https://images.unsplash.com/photo-1572442388796-11668a67e53d?auto=format&fit=crop&w=900&q=85">
+            <div>
+              <h3 class="menu-item-title">Ceremony Mocha</h3>
+              <p>Single-origin chocolate, double ristretto, orange oil, cream.</p>
+            </div>
+            <span class="price">$10</span>
+          </article>
+        </div>
+      </div>
+      <div class="drink-preview" aria-hidden="true">
+        <img src="" alt="" />
+      </div>
+    </section>
+
+    <section class="ritual">
+      <div class="ritual-card">
+        <p class="section-kicker">After hours</p>
+        <h2 class="split-reveal">The city gets louder. We get slower.</h2>
+        <p class="reveal-line split-reveal">Book the back table for tasting flights, late edits, or conversations that need dim light and excellent foam.</p>
+      </div>
+    </section>
+
+    <section class="reservation" id="reserve">
+      <div class="reservation-box">
+        <div>
+          <p class="section-kicker">Reservations</p>
+          <h2 class="split-reveal">Come for one cup. Stay for the room.</h2>
+          <p class="split-reveal">Nocturne House takes a handful of nightly reservations and leaves the rest to beautiful chance.</p>
+        </div>
+        <a class="magnetic hover-target" href="mailto:reservations@nocturne.example"><span>Reserve tonight</span></a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>Nocturne House</span>
+    <span>12 Ember Lane · 7AM to late</span>
+  </footer>
+
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const lenis = prefersReduced ? null : new Lenis({
+      duration: 1.18,
+      smoothWheel: true,
+      wheelMultiplier: 0.86
+    });
+
+    if (lenis) {
+      lenis.on("scroll", ScrollTrigger.update);
+      gsap.ticker.add((time) => lenis.raf(time * 1000));
+      gsap.ticker.lagSmoothing(0);
+    }
+
+    const cupLiquid = document.querySelector(".cup-liquid");
+    const cupTop = 28;
+    const cupBottom = 102;
+    const cupFillHeight = cupBottom - cupTop;
+
+    function updateCupFill() {
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollable <= 0 ? 0 : window.scrollY / scrollable;
+      const clamped = Math.min(Math.max(progress, 0), 1);
+
+      /*
+        Coffee cup scroll math:
+        The SVG liquid rect is clipped to the cup bowl shape. We convert page scroll
+        progress from 0..1 into a liquid height from 0..cupFillHeight, then move the
+        rect's y upward by the same amount so the cup fills from bottom to top.
+      */
+      const liquidHeight = clamped * cupFillHeight;
+      cupLiquid.setAttribute("height", liquidHeight.toFixed(2));
+      cupLiquid.setAttribute("y", (cupBottom - liquidHeight).toFixed(2));
+    }
+
+    window.addEventListener("scroll", updateCupFill, { passive: true });
+    window.addEventListener("resize", updateCupFill);
+    updateCupFill();
+
+    const dot = document.querySelector(".cursor-dot");
+    const ring = document.querySelector(".cursor-ring");
+    const dotX = gsap.quickTo(dot, "x", { duration: 0.12, ease: "power3.out" });
+    const dotY = gsap.quickTo(dot, "y", { duration: 0.12, ease: "power3.out" });
+    const ringX = gsap.quickTo(ring, "x", { duration: 0.34, ease: "power3.out" });
+    const ringY = gsap.quickTo(ring, "y", { duration: 0.34, ease: "power3.out" });
+
+    window.addEventListener("mousemove", (event) => {
+      dotX(event.clientX);
+      dotY(event.clientY);
+      ringX(event.clientX);
+      ringY(event.clientY);
+    });
+
+    document.querySelectorAll(".hover-target, .magnetic").forEach((target) => {
+      target.addEventListener("mouseenter", () => document.body.classList.add("is-hovering"));
+      target.addEventListener("mouseleave", () => document.body.classList.remove("is-hovering"));
+    });
+
+    document.querySelectorAll(".magnetic").forEach((button) => {
+      const strength = 0.32;
+
+      button.addEventListener("mousemove", (event) => {
+        const rect = button.getBoundingClientRect();
+        const x = event.clientX - rect.left - rect.width / 2;
+        const y = event.clientY - rect.top - rect.height / 2;
+        gsap.to(button, {
+          x: x * strength,
+          y: y * strength,
+          duration: 0.42,
+          ease: "power3.out"
+        });
+      });
+
+      button.addEventListener("mouseleave", () => {
+        gsap.to(button, { x: 0, y: 0, duration: 0.55, ease: "elastic.out(1, 0.35)" });
+      });
+    });
+
+    gsap.fromTo(".bean",
+      { opacity: 0, y: 30, rotation: "+=30" },
+      { opacity: 0.82, y: 0, rotation: "-=12", duration: 1.3, stagger: 0.16, delay: 0.45, ease: "power3.out" }
+    );
+
+    gsap.fromTo(".steam",
+      { opacity: 0, y: 34, scaleY: 0.65 },
+      { opacity: 0.56, y: -28, scaleY: 1.2, duration: 2.8, stagger: 0.28, repeat: -1, yoyo: true, ease: "sine.inOut", delay: 0.65 }
+    );
+
+    gsap.to(".hero", {
+      backgroundPosition: "50% 68%",
+      ease: "none",
+      scrollTrigger: {
+        trigger: ".hero",
+        start: "top top",
+        end: "bottom top",
+        scrub: true
+      }
+    });
+
+    function buildLineReveal(element) {
+      const text = element.textContent.trim();
+      const words = text.split(/\s+/);
+      element.innerHTML = words.map((word) => `<span class="word-probe">${word}</span>`).join(" ");
+
+      const probes = Array.from(element.querySelectorAll(".word-probe"));
+      const lines = [];
+
+      probes.forEach((word) => {
+        const top = Math.round(word.offsetTop);
+        const currentLine = lines[lines.length - 1];
+        if (!currentLine || Math.abs(currentLine.top - top) > 3) {
+          lines.push({ top, words: [word.textContent] });
+        } else {
+          currentLine.words.push(word.textContent);
+        }
+      });
+
+      element.innerHTML = lines.map((line) => (
+        `<span class="line-mask"><span class="line-inner">${line.words.join(" ")}</span></span>`
+      )).join("");
+
+      gsap.from(element.querySelectorAll(".line-inner"), {
+        yPercent: 110,
+        opacity: 0,
+        duration: 1,
+        stagger: 0.11,
+        ease: "power4.out",
+        scrollTrigger: {
+          trigger: element,
+          start: "top 84%",
+          once: true
+        }
+      });
+    }
+
+    document.fonts.ready.then(() => {
+      document.querySelectorAll(".split-reveal").forEach(buildLineReveal);
+      ScrollTrigger.refresh();
+    });
+
+    const preview = document.querySelector(".drink-preview");
+    const previewImg = preview.querySelector("img");
+    const previewX = gsap.quickTo(preview, "x", { duration: 0.42, ease: "power3.out" });
+    const previewY = gsap.quickTo(preview, "y", { duration: 0.42, ease: "power3.out" });
+
+    document.querySelectorAll(".menu-item").forEach((item) => {
+      item.addEventListener("mouseenter", () => {
+        previewImg.src = item.dataset.image;
+        gsap.to(preview, { opacity: 1, scale: 1, rotation: -2, duration: 0.35, ease: "power3.out" });
+      });
+
+      item.addEventListener("mousemove", (event) => {
+        previewX(event.clientX + 34);
+        previewY(event.clientY - 12);
+      });
+
+      item.addEventListener("mouseleave", () => {
+        gsap.to(preview, { opacity: 0, scale: 0.88, rotation: -4, duration: 0.3, ease: "power3.out" });
+      });
+    });
+
+    if (prefersReduced) {
+      gsap.globalTimeline.timeScale(2);
+    }
+  </script>
+</body>
+</html>
